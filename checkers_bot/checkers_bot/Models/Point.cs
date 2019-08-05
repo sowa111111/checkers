@@ -3,9 +3,9 @@ using System;
 
 namespace checkers_bot
 {
-    public class Point
+    public class CellPoint
     {
-        public Point(byte x, byte y)
+        public CellPoint(byte x, byte y)
         {
             X = x;
             Y = y;
@@ -16,5 +16,8 @@ namespace checkers_bot
 
         [JsonProperty("y")]
         public Byte Y { get; set; }
+
+        public static bool IsValidCellPoint(int x, int y)
+            => x >= 0 && x <= 7 && y >= 0 && y <= 7;
     }
 }

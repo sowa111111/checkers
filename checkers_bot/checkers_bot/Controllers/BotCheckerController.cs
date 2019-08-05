@@ -13,13 +13,13 @@ namespace checkers_bot.Controllers
         {
             var startingMoveForWhite = new CheckerMove
             {
-                FromPoint = new Point(0, 5),
-                ToPoint = new Point(1, 4)
+                FromPoint = new CellPoint(0, 5),
+                ToPoint = new CellPoint(1, 4)
             };
             var startingMoveForBlack = new CheckerMove
             {
-                FromPoint = new Point(1, 2),
-                ToPoint = new Point(0, 3)
+                FromPoint = new CellPoint(1, 2),
+                ToPoint = new CellPoint(0, 3)
             };
 
             return new[] {

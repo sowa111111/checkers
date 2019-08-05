@@ -5,9 +5,9 @@ namespace checkers_bot
     public class CheckerMove
     {
         [JsonProperty("from")]
-        public Point FromPoint { get; set; }
+        public CellPoint FromPoint { get; set; }
 
         [JsonProperty("to")]
-        public Point ToPoint { get; set; }
+        public CellPoint ToPoint { get; set; }
     }
 }
