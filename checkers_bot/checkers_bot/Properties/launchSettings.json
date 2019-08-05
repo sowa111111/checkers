@@ -1,0 +1,10 @@
+﻿{
+  "profiles": {
+    "checkers_bot": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
