@@ -34,7 +34,12 @@ namespace checkers_bot
                 app.UseHsts();
             }
 
-            app.UseMvc();
+            app
+                .UseCors(options => options
+                    .AllowAnyOrigin()
+                    .AllowAnyHeader()
+                    .AllowAnyMethod())
+                .UseMvc();
         }
     }
 }
