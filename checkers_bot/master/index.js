@@ -21,12 +21,10 @@
     canvasHeight,
     cellHeight,
     cellWidth,
-    currentChecker,
-    logDiv;
+    currentChecker;
 
   $(document).ready(function() {
     fieldCanvas = $("#canvas")[0];
-    logDiv = $("#log")[0];
     context = fieldCanvas.getContext("2d");
 
     canvasWidth = fieldCanvas.width;
@@ -38,19 +36,44 @@
     drawField();
     drawGame();
 
-    fieldCanvas.addEventListener("click", addStep);
-    $("#back")[0].addEventListener("click", function() {
-      field = history.pop();
-      drawCells();
+    fieldCanvas.addEventListener("mousedown", function(e) {
+      let position = getMousePosition(e);
+      addStep(position);
+      currentChecker = field[position.x][position.y];
+
+      fieldCanvas.addEventListener("mousemove", omMouseMove);
+
+      return false;
     });
-    $("#clear")[0].addEventListener("click", function() {
-      steps = [];
-      $("#log").empty();
-    });
-    $("#go")[0].addEventListener("click", function() {
+
+    fieldCanvas.addEventListener("mouseup", function(e) {
+      let position = getMousePosition(e);
+      addStep(position);
+
+      fieldCanvas.removeEventListener("mousemove", omMouseMove);
+
       playSteps(0, 1);
     });
+
+    $("#back")[0].addEventListener("click", function() {
+      field = history.pop();
+      drawGame();
+    });
   });
+
+  function omMouseMove(e) {
+    let position = getMousePosition(e);
+    let x = position.x;
+    let y = position.y;
+
+    context.fillStyle = "rgba(0,255,0,0.1)";
+    context.fillRect(
+      y * cellHeight,
+      x * cellWidth,
+      cellWidth - 1,
+      cellHeight - 1
+    );
+  }
 
   function drawField() {
     let horizontalLine = 0;
@@ -125,17 +148,8 @@
     context.fill();
   }
 
-  function drawLog(position) {
-    logDiv.append(`- [${position.y}][${position.x}]`);
-  }
-
-  function addStep(e) {
-    let position = getClickPosition(e);
-    if (steps.length == 0) {
-      currentChecker = field[position.x][position.y];
-    }
+  function addStep(position) {
     steps.push(position);
-    drawLog(position);
   }
 
   function playSteps(start, next) {
@@ -143,14 +157,13 @@
     let to = steps[next];
     if (!to) {
       steps = [];
-      $("#log").empty();
       return;
     }
 
     setTimeout(function() {
       moveCheck(from, to);
       playSteps(next, next + 1);
-    }, 1000);
+    }, 500);
   }
 
   function moveCheck(from, to) {
@@ -175,7 +188,7 @@
     return newField;
   }
 
-  function getClickPosition(e) {
+  function getMousePosition(e) {
     let xMouse = e.clientX;
     let yMouse = e.clientY;
 
