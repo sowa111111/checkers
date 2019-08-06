@@ -66,13 +66,15 @@
     let x = position.x;
     let y = position.y;
 
-    context.fillStyle = "rgba(0,255,0,0.1)";
-    context.fillRect(
-      y * cellHeight,
-      x * cellWidth,
-      cellWidth - 1,
-      cellHeight - 1
-    );
+    if ((x % 2 == 0 && y % 2 == 1) || (x % 2 == 1 && y % 2 == 0)) {
+      context.fillStyle = "rgba(0,255,0,0.1)";
+      context.fillRect(
+        y * cellHeight,
+        x * cellWidth,
+        cellWidth - 1,
+        cellHeight - 1
+      );
+    }
   }
 
   function drawField() {
