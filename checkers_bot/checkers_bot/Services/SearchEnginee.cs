@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace checkers_bot.Services
 {
@@ -11,7 +13,16 @@ namespace checkers_bot.Services
         {
             var possibleMoves = new List<PossibleMoves>();
 
-            //TODO: check attacks.
+            for (byte x = 0; x < 8; x++)
+                for (byte y = 0; y < 8; y++)
+                {
+                    if (data.Field[y][x] != CellState.EmptyCell && IsOurChecker(data.Team, data.Field[y][x]))
+                    {
+                        var tree = new CheckerMoveTreeNode();
+                        SearchAttackMoves(x, y, data.Field, data.Team, tree);
+                        possibleMoves.AddRange(ReadCheckerMoveTree(data, tree));
+                    }
+                }
 
             if (possibleMoves.Count != 0)
             {
@@ -21,12 +32,51 @@ namespace checkers_bot.Services
             for (byte x = 0; x < 8; x++)
                 for (byte y = 0; y < 8; y++)
                 {
-                    if (data.Field[x][y] != CellState.EmptyCell && IsOurChecker(data.Team, data.Field[x][y]))
+                    if (data.Field[y][x] != CellState.EmptyCell && IsOurChecker(data.Team, data.Field[y][x]))
                     {
-                        var moves = SearchMoveAround(x, y, data.Field, data.Team);
-                        possibleMoves.Add(new PossibleMoves { Moves = moves });
+                        var moves = SearchMoveAround(x, y, data.Field, data.Team)
+                            .Select(move =>
+                            new PossibleMoves
+                            {
+                                Moves = new CheckerMove[] { move },
+                                Weight = 0
+                            });
+                        possibleMoves.AddRange(moves);
                     }
                 }
+
+            return possibleMoves;
+        }
+
+        private List<PossibleMoves> ReadCheckerMoveTree(CheckerPayload data, CheckerMoveTreeNode tree)
+        {
+            var possibleMoves = new List<PossibleMoves>();
+
+            void ReadTree(List<CheckerMove> previousMoves, CheckerMoveTreeNode node)
+            {
+                if (node.Move != null)
+                {
+                    previousMoves.Add(node.Move);
+
+                    if (node.ChildMoves?.Count > 0)
+                    {
+                        foreach (var childMove in node.ChildMoves)
+                        {
+                            ReadTree(previousMoves.ToList(), childMove);
+                        }
+                    }
+                    else
+                    {
+                        possibleMoves.Add(new PossibleMoves
+                        {
+                            Moves = previousMoves.ToArray(),
+                            Weight = previousMoves.Count
+                        });
+                    }
+                }
+            }
+
+            tree.ChildMoves.ForEach(child => ReadTree(new List<CheckerMove>(), child));
 
             return possibleMoves;
         }
@@ -57,12 +107,12 @@ namespace checkers_bot.Services
         {
             var targetX = x + dirrectionX;
             var targetY = y + dirrectionY;
-            if (!CellPoint.IsValidCellPoint(targetX, targetY) || !IsEmptyCell(field[targetX][targetY]))
+            if (!CellPoint.IsValidCellPoint(targetX, targetY) || !IsEmptyCell(field[targetY][targetX]))
             {
                 return false;
             }
 
-            if (IsQueen(field[x][y]))
+            if (IsQueen(field[y][x]))
             {
                 return true;
             }
@@ -75,21 +125,64 @@ namespace checkers_bot.Services
             return team == Team.White && targetY < y;
         }
 
-        private void CheckAttackMove(byte x, byte y, int dirrectionX, int dirrectionY, CellState[][] field, Team team, List<CheckerMove> moves)
+        public void SearchAttackMoves(byte x, byte y, CellState[][] field, Team team, CheckerMoveTreeNode parent)
+        {
+            parent.ChildMoves = new List<CheckerMoveTreeNode>();
+
+            foreach (var i in _dx)
+            {
+                foreach (var j in _dy)
+                {
+                    var possibleMove = CheckAttackMove(x, y, i, j, field, team);
+
+                    if (possibleMove != null)
+                    {
+                        var node = new CheckerMoveTreeNode
+                        {
+                            Move = possibleMove
+                        };
+
+                        SearchAttackMoves(
+                            possibleMove.ToPoint.X,
+                            possibleMove.ToPoint.Y,
+                            RefreshedField(field, x, y, i, j),
+                            team,
+                            node);
+
+                        parent.ChildMoves.Add(node);
+                    }
+                }
+            }
+        }
+
+        private CellState[][] RefreshedField(CellState[][] field, byte x, byte y, int i, int j)
+        {
+            var newField = Copy(field);
+
+            var swap = newField[y][x];
+            newField[y][x] = CellState.EmptyCell;
+            newField[y + j][x + i] = CellState.EmptyCell;
+            newField[y + 2 * j][x + 2 * i] = swap;
+
+            return newField;
+        }
+
+        private CheckerMove CheckAttackMove(byte x, byte y, int dirrectionX, int dirrectionY, CellState[][] field, Team team)
         {
             if (CellPoint.IsValidCellPoint(x + 1 * (dirrectionX), y + 1 * (dirrectionY))
                 && CellPoint.IsValidCellPoint(x + 2 * (dirrectionX), y + 2 * (dirrectionY)))
             {
-                if (IsEnemyChecker(field[x + 1 * (dirrectionX)][y + 1 * (dirrectionY)], team)
-                    && IsEmptyCell(field[x + 2 * (dirrectionX)][y + 2 * (dirrectionY)]))
+                if (IsEnemyChecker(field[y + 1 * (dirrectionY)][x + 1 * (dirrectionX)], team)
+                    && IsEmptyCell(field[y + 2 * (dirrectionY)][x + 2 * (dirrectionX)]))
                 {
-                    moves.Add(new CheckerMove
+                    return new CheckerMove
                     {
                         FromPoint = new CellPoint(x, y),
                         ToPoint = new CellPoint((byte)(x + 2 * (dirrectionX)), (byte)(y + 2 * (dirrectionY)))
-                    });
+                    };
                 }
             }
+            return null;
         }
 
         private static bool IsOurChecker(Team team, CellState cellState)
