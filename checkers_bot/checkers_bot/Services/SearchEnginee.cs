@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace checkers_bot.Services
@@ -117,12 +116,8 @@ namespace checkers_bot.Services
                 return true;
             }
 
-            if (team == Team.Black && targetY < y)
-            {
-                return false;
-            }
-
-            return team == Team.White && targetY < y;
+            return team == Team.White && targetY < y
+                || team == Team.Black && targetY > y;
         }
 
         public void SearchAttackMoves(byte x, byte y, CellState[][] field, Team team, CheckerMoveTreeNode parent)
