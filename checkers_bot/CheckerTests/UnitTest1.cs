@@ -147,17 +147,5 @@ namespace Tests
             Assert.That(selectedMoves.Last().Moves[0].ToPoint.Y, Is.EqualTo(6));
             Assert.That(selectedMoves.Last().Moves[0].ToPoint.X, Is.EqualTo(7));
         }
-
-            Assert.That(selectedMoves.First().Moves[0].FromPoint.Y, Is.EqualTo(4));
-            Assert.That(selectedMoves.First().Moves[0].FromPoint.X, Is.EqualTo(5));
-            Assert.That(selectedMoves.First().Moves[0].ToPoint.Y, Is.EqualTo(6));
-            Assert.That(selectedMoves.First().Moves[0].ToPoint.X, Is.EqualTo(3));
-            Assert.That(possibleMoves.Last().Weight, Is.EqualTo(1));
-            Assert.That(selectedMoves.Last().Moves.Length, Is.EqualTo(1));
-            Assert.That(selectedMoves.Last().Moves[0].FromPoint.Y, Is.EqualTo(4));
-            Assert.That(selectedMoves.Last().Moves[0].FromPoint.X, Is.EqualTo(5));
-            Assert.That(selectedMoves.Last().Moves[0].ToPoint.Y, Is.EqualTo(6));
-            Assert.That(selectedMoves.Last().Moves[0].ToPoint.X, Is.EqualTo(7));
-        }
     }
 }

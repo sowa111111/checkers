@@ -128,18 +128,20 @@ namespace checkers_bot.Services
             {
                 foreach (var j in _dy)
                 {
-                    var possibleMove = CheckAttackMove(x, y, i, j, field, team);
-
-                    if (possibleMove != null)
+                    if (CheckAttackMove(x, y, i, j, field, team))
                     {
                         var node = new CheckerMoveTreeNode
                         {
-                            Move = possibleMove
+                            Move = new CheckerMove
+                            {
+                                FromPoint = new CellPoint(x, y),
+                                ToPoint = new CellPoint((byte)(x + 2 * (i)), (byte)(y + 2 * (j)))
+                            }
                         };
 
                         SearchAttackMoves(
-                            possibleMove.ToPoint.X,
-                            possibleMove.ToPoint.Y,
+                            node.Move.ToPoint.X,
+                            node.Move.ToPoint.Y,
                             RefreshedField(field, x, y, i, j),
                             team,
                             node);
@@ -162,7 +164,7 @@ namespace checkers_bot.Services
             return newField;
         }
 
-        private CheckerMove CheckAttackMove(byte x, byte y, int dirrectionX, int dirrectionY, CellState[][] field, Team team)
+        private bool CheckAttackMove(byte x, byte y, int dirrectionX, int dirrectionY, CellState[][] field, Team team)
         {
             if (CellPoint.IsValidCellPoint(x + 1 * (dirrectionX), y + 1 * (dirrectionY))
                 && CellPoint.IsValidCellPoint(x + 2 * (dirrectionX), y + 2 * (dirrectionY)))
@@ -170,14 +172,10 @@ namespace checkers_bot.Services
                 if (IsEnemyChecker(field[y + 1 * (dirrectionY)][x + 1 * (dirrectionX)], team)
                     && IsEmptyCell(field[y + 2 * (dirrectionY)][x + 2 * (dirrectionX)]))
                 {
-                    return new CheckerMove
-                    {
-                        FromPoint = new CellPoint(x, y),
-                        ToPoint = new CellPoint((byte)(x + 2 * (dirrectionX)), (byte)(y + 2 * (dirrectionY)))
-                    };
+                    return true;
                 }
             }
-            return null;
+            return false;
         }
 
         private static bool IsOurChecker(Team team, CellState cellState)
