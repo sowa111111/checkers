@@ -128,21 +128,30 @@ namespace checkers_bot.Services
             {
                 foreach (var j in _dy)
                 {
-                    if (CheckAttackMove(x, y, i, j, field, team))
+                    var c = 1;
+                    if (IsQueen(field[y][x]))
+                    {
+                        while (CellPoint.IsValidCellPoint(x + c * i, y + c * j) && IsEmptyCell(field[y + c * j][x + c * i]))
+                        {
+                            c++;
+                        }
+                    }
+
+                    if (CheckAttackMove(x, y, i, j, c, field, team))
                     {
                         var node = new CheckerMoveTreeNode
                         {
                             Move = new CheckerMove
                             {
                                 FromPoint = new CellPoint(x, y),
-                                ToPoint = new CellPoint((byte)(x + 2 * (i)), (byte)(y + 2 * (j)))
+                                ToPoint = new CellPoint((byte)(x + (c + 1) * i), (byte)(y + (c + 1) * j))
                             }
                         };
 
                         SearchAttackMoves(
                             node.Move.ToPoint.X,
                             node.Move.ToPoint.Y,
-                            RefreshedField(field, x, y, i, j),
+                            RefreshedField(field, x, y, i, j, c),
                             team,
                             node);
 
@@ -152,25 +161,37 @@ namespace checkers_bot.Services
             }
         }
 
-        private CellState[][] RefreshedField(CellState[][] field, byte x, byte y, int i, int j)
+        private CellState[][] RefreshedField(CellState[][] field, byte x, byte y, int directionX, int directionY, int cofficient)
         {
             var newField = Copy(field);
 
+            int victomCellX = x + cofficient * directionX;
+            int victomCellY = y + cofficient * directionY;
+
+            int nextCellX = victomCellX + 1 * directionX;
+            int nextCellY = victomCellY + 1 * directionY;
+
             var swap = newField[y][x];
             newField[y][x] = CellState.EmptyCell;
-            newField[y + j][x + i] = CellState.EmptyCell;
-            newField[y + 2 * j][x + 2 * i] = swap;
+            newField[victomCellY][victomCellX] = CellState.EmptyCell;
+            newField[nextCellY][nextCellX] = swap;
 
             return newField;
         }
 
-        private bool CheckAttackMove(byte x, byte y, int dirrectionX, int dirrectionY, CellState[][] field, Team team)
+        private bool CheckAttackMove(byte x, byte y, int dirrectionX, int dirrectionY, int cofficient, CellState[][] field, Team team)
         {
-            if (CellPoint.IsValidCellPoint(x + 1 * (dirrectionX), y + 1 * (dirrectionY))
-                && CellPoint.IsValidCellPoint(x + 2 * (dirrectionX), y + 2 * (dirrectionY)))
+            int victomCellX = x + cofficient * dirrectionX;
+            int victomCellY = y + cofficient * dirrectionY;
+
+            int nextCellX = victomCellX + 1 * dirrectionX;
+            int nextCellY = victomCellY + 1 * dirrectionY;
+
+            if (CellPoint.IsValidCellPoint(victomCellX, victomCellY)
+                && CellPoint.IsValidCellPoint(nextCellX, nextCellY))
             {
-                if (IsEnemyChecker(field[y + 1 * (dirrectionY)][x + 1 * (dirrectionX)], team)
-                    && IsEmptyCell(field[y + 2 * (dirrectionY)][x + 2 * (dirrectionX)]))
+                if (IsEnemyChecker(field[victomCellY][victomCellX], team)
+                    && IsEmptyCell(field[nextCellY][nextCellX]))
                 {
                     return true;
                 }
