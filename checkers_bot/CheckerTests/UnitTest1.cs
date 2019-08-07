@@ -20,37 +20,37 @@ namespace Tests
         {
             var payload = new CheckerPayload
             {
-                Field = new CellState[][]
+                Field = new[]
                 {
-                    new CellState[]
+                    new[]
                     {
                         CellState.EmptyCell, CellState.BlackChecker, CellState.EmptyCell, CellState.BlackChecker,CellState.EmptyCell, CellState.BlackChecker, CellState.EmptyCell, CellState.BlackChecker
                     },
-                    new CellState[]
+                    new[]
                     {
                         CellState.BlackChecker, CellState.EmptyCell, CellState.BlackChecker,CellState.EmptyCell, CellState.BlackChecker, CellState.EmptyCell, CellState.BlackChecker,CellState.EmptyCell
                     },
-                    new CellState[]
+                    new[]
                     {
                         CellState.EmptyCell, CellState.BlackChecker, CellState.EmptyCell, CellState.BlackChecker, CellState.EmptyCell, CellState.BlackChecker, CellState.EmptyCell, CellState.BlackChecker
                     },
-                    new CellState[]
+                    new[]
                     {
                         CellState.EmptyCell, CellState.EmptyCell, CellState.WhiteChecker, CellState.EmptyCell, CellState.EmptyCell, CellState.EmptyCell, CellState.EmptyCell, CellState.EmptyCell
                     },
-                    new CellState[]
+                    new[]
                     {
                         CellState.EmptyCell, CellState.EmptyCell, CellState.EmptyCell, CellState.EmptyCell, CellState.EmptyCell, CellState.EmptyCell, CellState.EmptyCell, CellState.EmptyCell
                     },
-                    new CellState[]
+                    new[]
                     {
                         CellState.WhiteChecker, CellState.EmptyCell, CellState.WhiteChecker,CellState.EmptyCell, CellState.WhiteChecker, CellState.EmptyCell, CellState.WhiteChecker,CellState.EmptyCell
                     },
-                    new CellState[]
+                    new[]
                     {
                         CellState.EmptyCell, CellState.WhiteChecker, CellState.EmptyCell, CellState.EmptyCell, CellState.EmptyCell, CellState.WhiteChecker, CellState.EmptyCell, CellState.WhiteChecker
                     },
-                    new CellState[]
+                    new[]
                     {
                         CellState.WhiteChecker, CellState.EmptyCell, CellState.WhiteChecker,CellState.EmptyCell, CellState.WhiteChecker, CellState.EmptyCell, CellState.WhiteChecker,CellState.EmptyCell
                     }
@@ -87,37 +87,37 @@ namespace Tests
         {
             var payload = new CheckerPayload
             {
-                Field = new CellState[][]
+                Field = new[]
                 {
-                    new CellState[]
+                    new[]
                     {
                         CellState.EmptyCell, CellState.BlackChecker, CellState.EmptyCell, CellState.BlackChecker,CellState.EmptyCell, CellState.BlackChecker, CellState.EmptyCell, CellState.BlackChecker
                     },
-                    new CellState[]
+                    new[]
                     {
                         CellState.BlackChecker, CellState.EmptyCell, CellState.BlackChecker,CellState.EmptyCell, CellState.BlackChecker, CellState.EmptyCell, CellState.BlackChecker,CellState.EmptyCell
                     },
-                    new CellState[]
+                    new[]
                     {
                         CellState.EmptyCell, CellState.BlackChecker, CellState.EmptyCell, CellState.BlackChecker, CellState.EmptyCell, CellState.BlackChecker, CellState.EmptyCell, CellState.BlackChecker
                     },
-                    new CellState[]
+                    new[]
                     {
                         CellState.EmptyCell, CellState.EmptyCell, CellState.WhiteChecker, CellState.EmptyCell, CellState.EmptyCell, CellState.EmptyCell, CellState.EmptyCell, CellState.EmptyCell
                     },
-                    new CellState[]
+                    new[]
                     {
-                        CellState.EmptyCell, CellState.EmptyCell, CellState.EmptyCell, CellState.EmptyCell, CellState.EmptyCell, CellState.BlackQueenChecker, CellState.EmptyCell, CellState.EmptyCell
+                        CellState.EmptyCell, CellState.EmptyCell, CellState.EmptyCell, CellState.EmptyCell, CellState.EmptyCell, CellState.BlackChecker, CellState.EmptyCell, CellState.EmptyCell
                     },
-                    new CellState[]
+                    new[]
                     {
                         CellState.WhiteChecker, CellState.EmptyCell, CellState.WhiteChecker,CellState.EmptyCell, CellState.WhiteChecker, CellState.EmptyCell, CellState.WhiteChecker,CellState.EmptyCell
                     },
-                    new CellState[]
+                    new[]
                     {
                         CellState.EmptyCell, CellState.WhiteChecker, CellState.EmptyCell, CellState.EmptyCell, CellState.EmptyCell, CellState.EmptyCell, CellState.EmptyCell, CellState.EmptyCell
                     },
-                    new CellState[]
+                    new[]
                     {
                         CellState.WhiteChecker, CellState.EmptyCell, CellState.WhiteChecker,CellState.EmptyCell, CellState.WhiteChecker, CellState.EmptyCell, CellState.WhiteChecker,CellState.EmptyCell
                     }
@@ -130,8 +130,24 @@ namespace Tests
             Assert.That(possibleMoves, Has.Count.EqualTo(4));
             var selectedMoves = possibleMoves.Where(x => x.Moves.Any(y => y.FromPoint.Y == 4 && y.FromPoint.X == 5)).ToList();
             Assert.That(selectedMoves, Has.Count.EqualTo(2));
-            Assert.That(possibleMoves.First().Weight, Is.EqualTo(1));
-            Assert.That(selectedMoves.First().Moves.Length, Is.EqualTo(1));
+            Assert.That(selectedMoves.First().Weight, Is.EqualTo(2));
+            Assert.That(selectedMoves.First().Moves.Length, Is.EqualTo(2));
+            Assert.That(selectedMoves.First().Moves[0].FromPoint.Y, Is.EqualTo(4));
+            Assert.That(selectedMoves.First().Moves[0].FromPoint.X, Is.EqualTo(5));
+            Assert.That(selectedMoves.First().Moves[0].ToPoint.Y, Is.EqualTo(6));
+            Assert.That(selectedMoves.First().Moves[0].ToPoint.X, Is.EqualTo(3));
+            Assert.That(selectedMoves.First().Moves[1].FromPoint.Y, Is.EqualTo(6));
+            Assert.That(selectedMoves.First().Moves[1].FromPoint.X, Is.EqualTo(3));
+            Assert.That(selectedMoves.First().Moves[1].ToPoint.Y, Is.EqualTo(4));
+            Assert.That(selectedMoves.First().Moves[1].ToPoint.X, Is.EqualTo(1));
+            Assert.That(possibleMoves.Last().Weight, Is.EqualTo(1));
+            Assert.That(selectedMoves.Last().Moves.Length, Is.EqualTo(1));
+            Assert.That(selectedMoves.Last().Moves[0].FromPoint.Y, Is.EqualTo(4));
+            Assert.That(selectedMoves.Last().Moves[0].FromPoint.X, Is.EqualTo(5));
+            Assert.That(selectedMoves.Last().Moves[0].ToPoint.Y, Is.EqualTo(6));
+            Assert.That(selectedMoves.Last().Moves[0].ToPoint.X, Is.EqualTo(7));
+        }
+
             Assert.That(selectedMoves.First().Moves[0].FromPoint.Y, Is.EqualTo(4));
             Assert.That(selectedMoves.First().Moves[0].FromPoint.X, Is.EqualTo(5));
             Assert.That(selectedMoves.First().Moves[0].ToPoint.Y, Is.EqualTo(6));
