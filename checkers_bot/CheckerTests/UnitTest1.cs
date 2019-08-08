@@ -58,7 +58,11 @@ namespace Tests
                 Team = Team.Black
             };
 
-            var possibleMoves = _searchEnginee.SearchAllPossibleMoves(payload.Field, payload.Team);
+            var possibleMoves = _searchEnginee.SearchAllPossibleMoves(payload.Field, payload.Team)
+                .Where(x => x.Weight != 0)
+                .ToList();
+
+
             Assert.That(possibleMoves, Has.Count.EqualTo(2));
             Assert.That(possibleMoves.First().Weight, Is.EqualTo(1));
             Assert.That(possibleMoves.First().Moves.Length, Is.EqualTo(1));
@@ -125,7 +129,9 @@ namespace Tests
                 Team = Team.Black
             };
 
-            var possibleMoves = _searchEnginee.SearchAllPossibleMoves(payload.Field, payload.Team);
+            var possibleMoves = _searchEnginee.SearchAllPossibleMoves(payload.Field, payload.Team)
+                .Where(x => x.Weight != 0)
+                .ToList();
 
             Assert.That(possibleMoves, Has.Count.EqualTo(4));
             var selectedMoves = possibleMoves.Where(x => x.Moves.Any(y => y.FromPoint.Y == 4 && y.FromPoint.X == 5)).ToList();
@@ -191,7 +197,9 @@ namespace Tests
                 Team = Team.Black
             };
 
-            var possibleMoves = _searchEnginee.SearchAllPossibleMoves(payload.Field, payload.Team);
+            var possibleMoves = _searchEnginee.SearchAllPossibleMoves(payload.Field, payload.Team)
+                .Where(x => x.Weight > 0)
+                .ToList();
 
             Assert.That(possibleMoves, Has.Count.EqualTo(1));
             Assert.That(possibleMoves.First().Weight, Is.EqualTo(2));
@@ -249,9 +257,82 @@ namespace Tests
                 Team = Team.Black
             };
 
-            var possibleMoves = _searchEnginee.SearchAllPossibleMoves(payload.Field, payload.Team);
+            var possibleMoves = _searchEnginee.SearchAllPossibleMoves(payload.Field, payload.Team)
+                .Where(x => x.Weight > 0)
+                .ToList();
 
             Assert.That(possibleMoves.Where(x => x.Weight > 0).ToArray(), Has.Length.EqualTo(0));
+        }
+        [Test]
+        public void Test5()
+        {
+            var payload = new CheckerPayload
+            {
+                Field = new[]
+                {
+                    new[]
+                    {
+                        CellState.EmptyCell, CellState.BlackChecker, CellState.EmptyCell, CellState.BlackChecker,CellState.EmptyCell, CellState.BlackChecker, CellState.EmptyCell, CellState.BlackChecker
+                    },
+                    new[]
+                    {
+                        CellState.BlackChecker, CellState.EmptyCell, CellState.BlackChecker,CellState.EmptyCell, CellState.BlackChecker, CellState.EmptyCell, CellState.BlackChecker,CellState.EmptyCell
+                    },
+                    new[]
+                    {
+                        CellState.EmptyCell, CellState.BlackQueenChecker, CellState.EmptyCell, CellState.BlackChecker, CellState.EmptyCell, CellState.BlackChecker, CellState.EmptyCell, CellState.BlackChecker
+                    },
+                    new[]
+                    {
+                        CellState.EmptyCell, CellState.EmptyCell, CellState.EmptyCell, CellState.EmptyCell, CellState.EmptyCell, CellState.EmptyCell, CellState.EmptyCell, CellState.EmptyCell
+                    },
+                    new[]
+                    {
+                        CellState.EmptyCell, CellState.EmptyCell, CellState.EmptyCell, CellState.WhiteChecker, CellState.EmptyCell, CellState.EmptyCell, CellState.EmptyCell, CellState.EmptyCell
+                    },
+                    new[]
+                    {
+                        CellState.WhiteChecker, CellState.EmptyCell, CellState.WhiteChecker,CellState.EmptyCell, CellState.EmptyCell, CellState.EmptyCell, CellState.WhiteChecker,CellState.EmptyCell
+                    },
+                    new[]
+                    {
+                        CellState.EmptyCell, CellState.WhiteChecker, CellState.EmptyCell, CellState.EmptyCell, CellState.EmptyCell, CellState.EmptyCell, CellState.EmptyCell, CellState.EmptyCell
+                    },
+                    new[]
+                    {
+                        CellState.WhiteChecker, CellState.EmptyCell, CellState.WhiteChecker,CellState.EmptyCell, CellState.WhiteChecker, CellState.EmptyCell, CellState.EmptyCell,CellState.EmptyCell
+                    }
+                },
+                Team = Team.Black
+            };
+
+            var possibleMoves = _searchEnginee.SearchAllPossibleMoves(payload.Field, payload.Team)
+                .Where(x => x.Weight > 0)
+                .ToArray();
+
+            Assert.That(possibleMoves, Has.Length.EqualTo(3));
+            Assert.That(possibleMoves[0].Weight, Is.EqualTo(1));
+            Assert.That(possibleMoves[0].Moves.Length, Is.EqualTo(1));
+            Assert.That(possibleMoves[0].Moves[0].FromPoint.Y, Is.EqualTo(2));
+            Assert.That(possibleMoves[0].Moves[0].FromPoint.X, Is.EqualTo(1));
+            Assert.That(possibleMoves[0].Moves[0].ToPoint.Y, Is.EqualTo(5));
+            Assert.That(possibleMoves[0].Moves[0].ToPoint.X, Is.EqualTo(4));
+            Assert.That(possibleMoves[1].Weight, Is.EqualTo(2));
+            Assert.That(possibleMoves[1].Moves.Length, Is.EqualTo(2));
+            Assert.That(possibleMoves[1].Moves[0].FromPoint.Y, Is.EqualTo(2));
+            Assert.That(possibleMoves[1].Moves[0].FromPoint.X, Is.EqualTo(1));
+            Assert.That(possibleMoves[1].Moves[0].ToPoint.Y, Is.EqualTo(6));
+            Assert.That(possibleMoves[1].Moves[0].ToPoint.X, Is.EqualTo(5));
+            Assert.That(possibleMoves[1].Moves[1].FromPoint.Y, Is.EqualTo(6));
+            Assert.That(possibleMoves[1].Moves[1].FromPoint.X, Is.EqualTo(5));
+            Assert.That(possibleMoves[1].Moves[1].ToPoint.Y, Is.EqualTo(4));
+            Assert.That(possibleMoves[1].Moves[1].ToPoint.X, Is.EqualTo(7));
+            Assert.That(possibleMoves[2].Weight, Is.EqualTo(1));
+            Assert.That(possibleMoves[2].Moves.Length, Is.EqualTo(1));
+            Assert.That(possibleMoves[2].Moves[0].FromPoint.Y, Is.EqualTo(2));
+            Assert.That(possibleMoves[2].Moves[0].FromPoint.X, Is.EqualTo(1));
+            Assert.That(possibleMoves[2].Moves[0].ToPoint.Y, Is.EqualTo(7));
+            Assert.That(possibleMoves[2].Moves[0].ToPoint.X, Is.EqualTo(6));
         }
     }
 }

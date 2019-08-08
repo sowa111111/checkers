@@ -43,11 +43,6 @@ namespace checkers_bot.Services
                     }
                 }
 
-            if (possibleMoves.Count != 0)
-            {
-                return possibleMoves;
-            }
-
             for (byte x = 0; x < 8; x++)
                 for (byte y = 0; y < 8; y++)
                 {
@@ -57,7 +52,7 @@ namespace checkers_bot.Services
                             .Select(move =>
                             new PossibleMoves
                             {
-                                Moves = new CheckerMove[] { move },
+                                Moves = new[] { move },
                                 Weight = 0
                             });
                         possibleMoves.AddRange(moves);
@@ -159,37 +154,44 @@ namespace checkers_bot.Services
 
                     if (CheckAttackMove(x, y, i, j, c, field, team))
                     {
-                        var node = new CheckerMoveTreeNode
+                        var step = 1;
+                        do
                         {
-                            Move = new CheckerMove
+                            var node = new CheckerMoveTreeNode
                             {
-                                FromPoint = new CellPoint(x, y),
-                                ToPoint = new CellPoint((byte)(x + (c + 1) * i), (byte)(y + (c + 1) * j))
-                            }
-                        };
+                                Move = new CheckerMove
+                                {
+                                    FromPoint = new CellPoint(x, y),
+                                    ToPoint = new CellPoint((byte)(x + (c + step) * i), (byte)(y + (c + step) * j))
+                                }
+                            };
 
-                        SearchAttackMoves(
-                            node.Move.ToPoint.X,
-                            node.Move.ToPoint.Y,
-                            RefreshedField(field, x, y, i, j, c),
-                            team,
-                            node);
+                            SearchAttackMoves(
+                                node.Move.ToPoint.X,
+                                node.Move.ToPoint.Y,
+                                RefreshedField(field, x, y, i, j, c, step),
+                                team,
+                                node);
 
-                        parent.ChildMoves.Add(node);
+                            parent.ChildMoves.Add(node);
+                            step++;
+                        } while (IsQueen(field[y][x])
+                            && CellPoint.IsValidCellPoint(x + (c + 1 * step) * i, y + (c + 1 * step) * j)
+                            && IsEmptyCell(field[y + (c + 1 * step) * j][x + (c + 1 * step) * i]));
                     }
                 }
             }
         }
 
-        private CellState[][] RefreshedField(CellState[][] field, byte x, byte y, int directionX, int directionY, int cofficient)
+        private CellState[][] RefreshedField(CellState[][] field, byte x, byte y, int directionX, int directionY, int coefficient, int step)
         {
             var newField = Copy(field);
 
-            int victomCellX = x + cofficient * directionX;
-            int victomCellY = y + cofficient * directionY;
+            int victomCellX = x + coefficient * directionX;
+            int victomCellY = y + coefficient * directionY;
 
-            int nextCellX = victomCellX + 1 * directionX;
-            int nextCellY = victomCellY + 1 * directionY;
+            int nextCellX = x + (coefficient + step) * directionX;
+            int nextCellY = y + (coefficient + step) * directionY;
 
             var swap = newField[y][x];
             newField[y][x] = CellState.EmptyCell;
