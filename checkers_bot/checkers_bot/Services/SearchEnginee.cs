@@ -154,12 +154,22 @@ namespace checkers_bot.Services
                 {
                     if (CanMove(x, y, i, j, field, team))
                     {
-                        possibleMoves.Add(new CheckerMove
+                        var step = 1;
+
+                        do
                         {
-                            FromPoint = new CellPoint(x, y),
-                            ToPoint = new CellPoint((byte)(x + i), (byte)(y + j))
-                        });
+                            possibleMoves.Add(new CheckerMove
+                            {
+                                FromPoint = new CellPoint(x, y),
+                                ToPoint = new CellPoint((byte)(x + step * i), (byte)(y + step * j))
+                            });
+
+                            step++;
+                        } while (IsQueen(field[y][x])
+                            && CellPoint.IsValidCellPoint(x + step * i, y + step * j)
+                            && IsEmptyCell(field[y + step * j][x + step * i]));
                     }
+
                 }
             }
 
