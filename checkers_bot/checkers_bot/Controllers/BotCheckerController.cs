@@ -18,7 +18,7 @@ namespace checkers_bot.Controllers
         [HttpPost]
         public ActionResult<CheckerMove[]> GetNextMove([FromBody] CheckerPayload payload)
         {
-            var primaryMove = _searchEnginee.GetPrimaryMove(payload);
+            var primaryMove = _searchEnginee.FindNextMove(payload.Field, payload.Team);
 
             return primaryMove.Any()
                 ? (ActionResult<CheckerMove[]>)primaryMove

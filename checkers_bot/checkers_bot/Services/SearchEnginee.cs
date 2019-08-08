@@ -9,10 +9,59 @@ namespace checkers_bot.Services
         private readonly int[] _dx = { -1, 1 };
         private readonly int[] _dy = { -1, 1 };
 
-        public CheckerMove[] GetPrimaryMove(CheckerPayload payload)
+        public CheckerMove[] FindNextMove(CellState[][] field, Team team)
         {
-            var possibleMoves = SearchAllPossibleMoves(payload.Field, payload.Team).ToArray();
+            var possibleMoves = SearchAllPossibleMoves(field, team).ToArray();
 
+            if (possibleMoves?.Any() != true)
+            {
+                return new CheckerMove[] { };
+            }
+
+            foreach (var possibleMove in possibleMoves)
+            {
+                var newField = GetRefreshedField(possibleMove, field, team);
+                var possibleEnemyMove = SearchAllPossibleMoves(newField, GetEnemyTeam(team));
+
+                if (possibleEnemyMove.Any())
+                {
+                    var maxDamageWeight = possibleEnemyMove.Max(x => x.Weight);
+                    possibleMove.Weight -= maxDamageWeight;
+                }
+            }
+
+            return GetPrimaryMove(possibleMoves);
+        }
+
+        private CellState[][] GetRefreshedField(PossibleMoves possibleMove, CellState[][] field, Team team)
+        {
+            var newField = Copy(field);
+
+            foreach (var move in possibleMove.Moves)
+            {
+                var directionX = move.FromPoint.X < move.ToPoint.X ? 1 : -1;
+                var directionY = move.FromPoint.Y < move.ToPoint.Y ? 1 : -1;
+
+                var initialChecker = field[move.FromPoint.Y][move.FromPoint.X];
+
+                var targetX = move.FromPoint.X;
+                var targetY = move.FromPoint.Y;
+
+                do
+                {
+                    newField[targetY][targetX] = CellState.EmptyCell;
+                    targetX = (byte)(targetX + directionX);
+                    targetY = (byte)(targetY + directionY);
+                } while (targetY != move.ToPoint.Y && targetX != move.ToPoint.X);
+
+                newField[move.ToPoint.Y][move.ToPoint.X] = initialChecker;
+            }
+
+            return newField;
+        }
+
+        private CheckerMove[] GetPrimaryMove(IEnumerable<PossibleMoves> possibleMoves)
+        {
             if (possibleMoves?.Any() != true)
             {
                 return new CheckerMove[] { };
@@ -220,6 +269,9 @@ namespace checkers_bot.Services
             }
             return false;
         }
+
+        private static Team GetEnemyTeam(Team team)
+            => team == Team.White ? Team.Black : Team.White;
 
         private static bool IsOurChecker(Team team, CellState cellState)
             => team == Team.Black && IsBlackTeamChecker(cellState)
