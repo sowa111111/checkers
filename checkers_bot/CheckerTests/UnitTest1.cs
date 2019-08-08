@@ -58,7 +58,7 @@ namespace Tests
                 Team = Team.Black
             };
 
-            var possibleMoves = _searchEnginee.SearchAllPossibleMoves(payload);
+            var possibleMoves = _searchEnginee.SearchAllPossibleMoves(payload.Field, payload.Team);
             Assert.That(possibleMoves, Has.Count.EqualTo(2));
             Assert.That(possibleMoves.First().Weight, Is.EqualTo(1));
             Assert.That(possibleMoves.First().Moves.Length, Is.EqualTo(1));
@@ -125,7 +125,7 @@ namespace Tests
                 Team = Team.Black
             };
 
-            var possibleMoves = _searchEnginee.SearchAllPossibleMoves(payload);
+            var possibleMoves = _searchEnginee.SearchAllPossibleMoves(payload.Field, payload.Team);
 
             Assert.That(possibleMoves, Has.Count.EqualTo(4));
             var selectedMoves = possibleMoves.Where(x => x.Moves.Any(y => y.FromPoint.Y == 4 && y.FromPoint.X == 5)).ToList();
@@ -140,7 +140,7 @@ namespace Tests
             Assert.That(selectedMoves.First().Moves[1].FromPoint.X, Is.EqualTo(3));
             Assert.That(selectedMoves.First().Moves[1].ToPoint.Y, Is.EqualTo(4));
             Assert.That(selectedMoves.First().Moves[1].ToPoint.X, Is.EqualTo(1));
-            Assert.That(possibleMoves.Last().Weight, Is.EqualTo(1));
+            Assert.That(selectedMoves.Last().Weight, Is.EqualTo(1));
             Assert.That(selectedMoves.Last().Moves.Length, Is.EqualTo(1));
             Assert.That(selectedMoves.Last().Moves[0].FromPoint.Y, Is.EqualTo(4));
             Assert.That(selectedMoves.Last().Moves[0].FromPoint.X, Is.EqualTo(5));
@@ -191,7 +191,7 @@ namespace Tests
                 Team = Team.Black
             };
 
-            var possibleMoves = _searchEnginee.SearchAllPossibleMoves(payload);
+            var possibleMoves = _searchEnginee.SearchAllPossibleMoves(payload.Field, payload.Team);
 
             Assert.That(possibleMoves, Has.Count.EqualTo(1));
             Assert.That(possibleMoves.First().Weight, Is.EqualTo(2));
@@ -249,7 +249,7 @@ namespace Tests
                 Team = Team.Black
             };
 
-            var possibleMoves = _searchEnginee.SearchAllPossibleMoves(payload);
+            var possibleMoves = _searchEnginee.SearchAllPossibleMoves(payload.Field, payload.Team);
 
             Assert.That(possibleMoves.Where(x => x.Weight > 0).ToArray(), Has.Length.EqualTo(0));
         }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace checkers_bot.Services
@@ -8,18 +9,37 @@ namespace checkers_bot.Services
         private readonly int[] _dx = { -1, 1 };
         private readonly int[] _dy = { -1, 1 };
 
-        public IEnumerable<PossibleMoves> SearchAllPossibleMoves(CheckerPayload data)
+        public CheckerMove[] GetPrimaryMove(CheckerPayload payload)
+        {
+            var possibleMoves = SearchAllPossibleMoves(payload.Field, payload.Team).ToArray();
+
+            if (possibleMoves?.Any() != true)
+            {
+                return new CheckerMove[] { };
+            }
+
+            var weightedResult = possibleMoves
+                .GroupBy(x => x.Weight)
+                .OrderByDescending(x => x.Key)
+                .ToArray();
+
+            var maxWeight = weightedResult[0].ToArray();
+            var random = new Random();
+            return maxWeight[random.Next(maxWeight.Length)].Moves;
+        }
+
+        public IEnumerable<PossibleMoves> SearchAllPossibleMoves(CellState[][] field, Team team)
         {
             var possibleMoves = new List<PossibleMoves>();
 
             for (byte x = 0; x < 8; x++)
                 for (byte y = 0; y < 8; y++)
                 {
-                    if (data.Field[y][x] != CellState.EmptyCell && IsOurChecker(data.Team, data.Field[y][x]))
+                    if (field[y][x] != CellState.EmptyCell && IsOurChecker(team, field[y][x]))
                     {
                         var tree = new CheckerMoveTreeNode();
-                        SearchAttackMoves(x, y, data.Field, data.Team, tree);
-                        possibleMoves.AddRange(ReadCheckerMoveTree(data, tree));
+                        SearchAttackMoves(x, y, field, team, tree);
+                        possibleMoves.AddRange(ReadCheckerMoveTree(tree));
                     }
                 }
 
@@ -31,9 +51,9 @@ namespace checkers_bot.Services
             for (byte x = 0; x < 8; x++)
                 for (byte y = 0; y < 8; y++)
                 {
-                    if (data.Field[y][x] != CellState.EmptyCell && IsOurChecker(data.Team, data.Field[y][x]))
+                    if (field[y][x] != CellState.EmptyCell && IsOurChecker(team, field[y][x]))
                     {
-                        var moves = SearchMoveAround(x, y, data.Field, data.Team)
+                        var moves = SearchMoveAround(x, y, field, team)
                             .Select(move =>
                             new PossibleMoves
                             {
@@ -47,7 +67,7 @@ namespace checkers_bot.Services
             return possibleMoves;
         }
 
-        private List<PossibleMoves> ReadCheckerMoveTree(CheckerPayload data, CheckerMoveTreeNode tree)
+        private List<PossibleMoves> ReadCheckerMoveTree(CheckerMoveTreeNode tree)
         {
             var possibleMoves = new List<PossibleMoves>();
 

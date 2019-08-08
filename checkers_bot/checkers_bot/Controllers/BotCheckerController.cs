@@ -1,6 +1,5 @@
 ﻿using checkers_bot.Services;
 using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Linq;
 
 namespace checkers_bot.Controllers
@@ -19,21 +18,11 @@ namespace checkers_bot.Controllers
         [HttpPost]
         public ActionResult<CheckerMove[]> GetNextMove([FromBody] CheckerPayload payload)
         {
-            var possibleMoves = _searchEnginee.SearchAllPossibleMoves(payload).ToArray();
+            var primaryMove = _searchEnginee.GetPrimaryMove(payload);
 
-            if (possibleMoves?.Any() == true)
-            {
-                var weightedResult = possibleMoves
-                    .GroupBy(x => x.Weight)
-                    .OrderByDescending(x => x.Key)
-                    .ToArray();
-
-                var maxWeight = weightedResult[0].ToArray();
-                var random = new Random();
-                return maxWeight[random.Next(maxWeight.Length)].Moves;
-            }
-
-            return Ok("I don't have an option");
+            return primaryMove.Any()
+                ? (ActionResult<CheckerMove[]>)primaryMove
+                : Ok("I don't have an option");
         }
     }
 }
